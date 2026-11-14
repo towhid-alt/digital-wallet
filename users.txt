@@ -1,0 +1,3 @@
+{ email: 'atifAslam@gmail.com', username: 'Atif Aslam' , password: 'atifaslam@100' }
+{ email: 'zohanahmed5@yahoo.com', username: 'Zohan Ahmed' , password: 'zohan7pro' }
+{ email: 'sheiktowhid1@gmail.com', username: 'towhid' , password: 'sheik7pro' }

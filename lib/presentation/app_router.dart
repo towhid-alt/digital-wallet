@@ -1,3 +1,5 @@
+import 'package:digital_wallet/screens/chatHome.dart';
+import 'package:digital_wallet/screens/friendRequest.dart';
 import 'package:digital_wallet/screens/homeScreen.dart';
 import 'package:digital_wallet/screens/loginScreen.dart';
 import 'package:digital_wallet/screens/signUpScreen.dart';
@@ -15,6 +17,12 @@ class AppRouter {
 
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+
+      case '/chatHome':
+        return MaterialPageRoute(builder: (_) => const chatHomeScreen());
+
+      case '/friendRequest':
+        return MaterialPageRoute(builder: (_) => const requestScreen());
         
         default:
         return MaterialPageRoute(builder: (_) => Scaffold(

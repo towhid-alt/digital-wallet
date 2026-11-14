@@ -12,6 +12,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -63,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 60),
                   Text(
-                    'Sash',
+                    'Owes',
                     style: TextStyle(
                       fontFamily: 'Varsity',
                       fontSize: 30,
@@ -98,13 +99,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: 300,
                     child: TextField(
+                      obscureText: _obscureText,
                       style: const TextStyle(color: Colors.black),
                       controller: _passwordController,
-                      decoration: const InputDecoration(hintText: 'Password',
-                      border: OutlineInputBorder(
+                      decoration: InputDecoration(hintText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.green),
+                          
                         )),
-                      
+                    
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -124,7 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                     ),
                   ),
-
                 ],
               ),
             ),

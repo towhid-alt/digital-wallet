@@ -1,3 +1,4 @@
+
 import 'package:digital_wallet/bloc/auth/auth_bloc.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class _SignupscreenState extends State<Signupscreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  bool _obscureText = true;
 
   @override
   void dispose() {
@@ -28,6 +30,10 @@ class _SignupscreenState extends State<Signupscreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final username = _usernameController.text.trim();
+
+    if(password.length < 6){
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password should be atleast 6 characters')));
+    }
 
     if (email.isNotEmpty && password.isNotEmpty && username.isNotEmpty) {
       context.read<AuthBloc>().add(
@@ -68,7 +74,7 @@ class _SignupscreenState extends State<Signupscreen> {
                 children: [
                   const SizedBox(height: 60),
                   Text(
-                    'Sash',
+                    'Owes',
                     style: TextStyle(
                       fontFamily: 'Varsity',
                       fontSize: 30,
@@ -114,10 +120,21 @@ class _SignupscreenState extends State<Signupscreen> {
                   SizedBox(
                     width: 300,
                     child: TextField(
+                      obscureText: _obscureText,
                       style: const TextStyle(color: Colors.black),
                       controller: _passwordController,
-                      decoration: const InputDecoration(hintText: 'Password',
-                      border: OutlineInputBorder(
+                      decoration: InputDecoration(hintText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscureText ? Icons.visibility_off : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      ),
+                      border: const OutlineInputBorder(
                           borderSide: BorderSide(color: Colors.green),
                         )),
                       

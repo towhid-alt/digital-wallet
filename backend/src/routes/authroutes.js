@@ -17,23 +17,29 @@ router.post('/register', async (req, res) => {
         if (!emailRegex.test(email)) {
             return res.status(400).json({ message: "Invalid email format" })
         }
+        
         if (password.length < 6) {
             return res.status(400).json({ message: "Password should be atleast 6 characters long" })
         }
-        
-        const userExists = await db.orm.public.User.where((p) => or(p.email.ilike(email), p.name.ilike(username))).first()
+        console.log("Password hashed successfully for user: ", username)
+        const userExists = await db.orm.public.User.where((p) => or(p.email.ilike(email), p.username.ilike(username))).first()
         if (userExists) {
             return res.status(400).json({ message: "User already exists" })
         }
+        console.log("Creating user:", { email, username });
         const user = await db.orm.public.User.create({
             email: email,
-            name: username,
+            username: username,
             password: hashedPassword
         })
-
         //Create a JWT token for the user
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
+        console.log("Token created")
         res.cookie("token", token)
+        //Creating default account during registration
+        const account = db.orm.public.Account.create({
+            userId: user.id
+        })
         res.status(200).json({ message: "User created successfully", userId: user.id })
     } catch (e) {
         console.error("Error creating user:", error)

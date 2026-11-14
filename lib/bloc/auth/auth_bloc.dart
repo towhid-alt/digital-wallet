@@ -43,9 +43,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       email: event.email,
       password: event.password,
     );
-
+    print('Login response: $response');
     if (response['success']) {
       emit(AuthAuthenticated(userId: response['userId']));
+    } else {
+      emit(AuthError(message: response['message'] ?? 'AN ERROR OCCURED DURING LOGIN'));
     }
   }
 
@@ -90,7 +92,7 @@ class AuthService {
     print('Inside AuthService: signUp() called with username: $username, email: $email');
     try{
       final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/signup'),
+      Uri.parse('$baseUrl/api/auth/register'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'username': username,
