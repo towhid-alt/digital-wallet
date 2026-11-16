@@ -50,7 +50,6 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const {email, password} = req.body;
     try{ 
-        console.log("Login request received:", { email, password });
         const user = await db.orm.public.User.where((p) => p.email.ilike(email)).first()
         if (!user) {
             return res.status(400).json({ message: "Invalid email or password" })
@@ -62,7 +61,7 @@ router.post('/login', async (req, res) => {
         //Create a JWT token for the user
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' })
         res.cookie("token", token)
-        res.status(200).json({ message: "Login successful", userId: user.id })
+        res.status(200).json({ message: "Login successful", userId: user.id, token })
     } catch (error) {
         console.error("Error during login:", error)
         res.status(500).json({ message: "Internal server error" })

@@ -11,6 +11,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 22, 22, 23),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 300,
               width: 700,
               decoration: BoxDecoration(
-                color: Colors.green[200],
+                color: const Color.fromARGB(255, 40, 43, 40),
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(10),
                 //border: BoxBorder.all(color: Colors.black, width: 2)
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -60,14 +61,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.green,
-                          border: Border.all(color: Colors.black,width: 2.0),
+                          border: Border.all(color: Colors.white,width: 2.0),
                           image: DecorationImage(scale: 1.0,image: AssetImage('assets/icons/transfer.png',
                           ))
                         ),
                         
                       ),
                       const SizedBox(height: 10,),
-                      Text('Send Money',style: TextStyle(fontWeight: FontWeight.bold),)
+                      Text('Send Money',style: TextStyle(fontWeight: FontWeight.bold,
+                      color: Colors.white),)
                     ],
                   ),
                 ),
@@ -83,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 70,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.green,
+                          color: Colors.white,
                           border: Border.all(color: Colors.black,width: 2.0),
                           image: DecorationImage(scale: 1.0,image: AssetImage('assets/icons/friends.png',
                           ))
@@ -91,7 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         
                       ),
                       const SizedBox(height: 10,),
-                      Text('Owe Request',style: TextStyle(fontWeight: FontWeight.bold),)
+                      Text('Owe Request',style: TextStyle(fontWeight: FontWeight.bold,
+                      color: Colors.white),)
                     ],
                   ),
                 )

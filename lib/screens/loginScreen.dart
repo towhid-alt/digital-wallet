@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
     },
     builder: (context, state) {
       return  Scaffold(
-          backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 22, 22, 23),
           body: SingleChildScrollView(
             child: Center(
               child: Column(
@@ -77,14 +77,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: 300,
                     child: TextField(
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.white),
                       controller: _emailController,
                       decoration: const InputDecoration(
                         hintText: 'Email',
@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 300,
                     child: TextField(
                       obscureText: _obscureText,
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.white),
                       controller: _passwordController,
                       decoration: InputDecoration(hintText: 'Password',
                       suffixIcon: IconButton(

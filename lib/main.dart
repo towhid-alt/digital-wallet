@@ -1,4 +1,5 @@
 import 'package:digital_wallet/bloc/auth/auth_bloc.dart';
+import 'package:digital_wallet/bloc/friendRequests/friend_request_bloc.dart';
 import 'package:digital_wallet/presentation/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,6 +20,8 @@ class MyApp extends StatelessWidget {
            
         ),
         ),
+
+        BlocProvider(create: (context) => FriendRequestBloc(fetchService: FetchService(baseurl: 'http://localhost:5002')))
 
       ],
       child: MaterialApp(

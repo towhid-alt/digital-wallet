@@ -13,9 +13,11 @@ app.use(cors())
 
 const authRouter = require('./src/routes/authroutes.js')
 const accountsRouter = require('./src/routes/accountRoutes.js')
+const requestsRouter = require('./src/routes/friendRequests.js')
 
 app.use('/api/auth',authRouter)
 app.use('/api/accounts',accountsRouter)
+app.use('/api/requests', requestsRouter)
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

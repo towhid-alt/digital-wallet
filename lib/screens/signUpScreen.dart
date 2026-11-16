@@ -66,7 +66,7 @@ class _SignupscreenState extends State<Signupscreen> {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color.fromARGB(255, 22, 22, 23),
           body: SingleChildScrollView(
             child: Center(
               child: Column(
@@ -87,14 +87,14 @@ class _SignupscreenState extends State<Signupscreen> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
                     width: 300,
                     child: TextField(
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.white),
                       controller: _emailController,
                       decoration: const InputDecoration(
                         hintText: 'Email',
@@ -108,7 +108,7 @@ class _SignupscreenState extends State<Signupscreen> {
                   SizedBox(
                     width: 300,
                     child: TextField(
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.white),
                       controller: _usernameController,
                       decoration: const InputDecoration(hintText: 'Username',
                       border: OutlineInputBorder(
@@ -121,7 +121,7 @@ class _SignupscreenState extends State<Signupscreen> {
                     width: 300,
                     child: TextField(
                       obscureText: _obscureText,
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.white),
                       controller: _passwordController,
                       decoration: InputDecoration(hintText: 'Password',
                       suffixIcon: IconButton(
@@ -164,7 +164,7 @@ class _SignupscreenState extends State<Signupscreen> {
                       children: [
                         TextSpan(
                           text: 'Already have an account? ',
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.white),
                         ),
                         TextSpan(
                           text: 'Login',

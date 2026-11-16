@@ -36,14 +36,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     LoginRequested event,
     Emitter<AuthState> emit,
   ) async {
-    print('Inside AuthBloc: LoginRequested event received');
     emit(AuthLoading());
-    print('Attempting login for email: ${event.email}');
     final response = await authService.login(
       email: event.email,
       password: event.password,
     );
-    print('Login response: $response');
     if (response['success']) {
       emit(AuthAuthenticated(userId: response['userId']));
     } else {
@@ -56,14 +53,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
 class AuthService {
   final String baseUrl;
+  static String? accessToken;
 
-  AuthService({this.baseUrl = 'http://localhost:5002'}); //Named parameter constructor
+  AuthService({required this.baseUrl}); //Named parameter constructor
 
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
   }) async {
     try {
+      accessToken = null;
       print('Inside AuthService: login() called with email: $email');
       final response = await http.post(
         Uri.parse('$baseUrl/api/auth/login'),
@@ -74,6 +73,7 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        accessToken = data['token'] as String?;
         print('Login successful for user: $email');
         return {'success': true, 'message': data['message'], 'userId': data['userId']};
       } else {

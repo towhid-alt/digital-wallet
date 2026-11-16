@@ -23,9 +23,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'394fff42d4f5005fee5e630b03512b9afea83e9d2c703a3045a9a5038eacba63'>;
+  StorageHashBase<'1b7a86665429ddd5b863af15543de60cf2e1a2a774f781ded1bf954231c45e35'>;
 export type ExecutionHash =
-  ExecutionHashBase<'9a5883a46a0f8f232598bc988951650620bebba27bb6d25c01513cb5e3fd94b9'>;
+  ExecutionHashBase<'c90182a9ddfa2262541a0cd3a74501d84f44e35a796a9055fcbca6062a9199d2'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -284,6 +284,21 @@ type FieldTypeOverrides = {
           readonly input: 'ACTIVE' | 'FROZEN' | 'CLOSED';
         };
       };
+      readonly FriendRequest: {
+        readonly status: {
+          readonly output: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+          readonly input: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+        };
+      };
+      readonly ledger: {
+        readonly type: { readonly output: 'DEBIT' | 'CREDIT'; readonly input: 'DEBIT' | 'CREDIT' };
+      };
+      readonly transaction: {
+        readonly status: {
+          readonly output: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REVERSED';
+          readonly input: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REVERSED';
+        };
+      };
     };
   };
 };
@@ -309,6 +324,21 @@ type ColumnTypeOverrides = {
       readonly type: {
         readonly output: 'ACTIVE' | 'FROZEN' | 'CLOSED';
         readonly input: 'ACTIVE' | 'FROZEN' | 'CLOSED';
+      };
+    };
+    readonly FriendRequest: {
+      readonly status: {
+        readonly output: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+        readonly input: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+      };
+    };
+    readonly ledger: {
+      readonly type: { readonly output: 'DEBIT' | 'CREDIT'; readonly input: 'DEBIT' | 'CREDIT' };
+    };
+    readonly transaction: {
+      readonly status: {
+        readonly output: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REVERSED';
+        readonly input: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REVERSED';
       };
     };
   };
@@ -337,6 +367,17 @@ export namespace Models {
     user: public_User;
     readonly [RelationKeys]?: 'user';
   };
+  export type public_FriendRequest = {
+    createdAt: FieldOutputTypes['public']['FriendRequest']['createdAt'];
+    id: FieldOutputTypes['public']['FriendRequest']['id'];
+    receiverId: FieldOutputTypes['public']['FriendRequest']['receiverId'];
+    senderId: FieldOutputTypes['public']['FriendRequest']['senderId'];
+    status: FieldOutputTypes['public']['FriendRequest']['status'];
+    updatedAt: FieldOutputTypes['public']['FriendRequest']['updatedAt'];
+    receiver: public_User;
+    sender: public_User;
+    readonly [RelationKeys]?: 'receiver' | 'sender';
+  };
   export type public_User = {
     createdAt: FieldOutputTypes['public']['User']['createdAt'];
     email: FieldOutputTypes['public']['User']['email'];
@@ -344,14 +385,41 @@ export namespace Models {
     password: FieldOutputTypes['public']['User']['password'];
     updatedAt: FieldOutputTypes['public']['User']['updatedAt'];
     username: FieldOutputTypes['public']['User']['username'];
-    readonly [RelationKeys]?: never;
+    receivedRequests: public_FriendRequest[];
+    sentRequests: public_FriendRequest[];
+    readonly [RelationKeys]?: 'receivedRequests' | 'sentRequests';
+  };
+  export type public_ledger = {
+    account: FieldOutputTypes['public']['ledger']['account'];
+    amount: FieldOutputTypes['public']['ledger']['amount'];
+    id: FieldOutputTypes['public']['ledger']['id'];
+    transaction: FieldOutputTypes['public']['ledger']['transaction'];
+    type: FieldOutputTypes['public']['ledger']['type'];
+    accountRel: public_Account;
+    transactionR: public_transaction;
+    readonly [RelationKeys]?: 'accountRel' | 'transactionR';
+  };
+  export type public_transaction = {
+    amount: FieldOutputTypes['public']['transaction']['amount'];
+    createdAt: FieldOutputTypes['public']['transaction']['createdAt'];
+    fromAccount: FieldOutputTypes['public']['transaction']['fromAccount'];
+    id: FieldOutputTypes['public']['transaction']['id'];
+    idempotencyKey: FieldOutputTypes['public']['transaction']['idempotencyKey'];
+    status: FieldOutputTypes['public']['transaction']['status'];
+    toAccount: FieldOutputTypes['public']['transaction']['toAccount'];
+    from: public_Account;
+    to: public_Account;
+    readonly [RelationKeys]?: 'from' | 'to';
   };
 }
 
 export declare const models: {
   public: {
     Account: Models.public_Account;
+    FriendRequest: Models.public_FriendRequest;
     User: Models.public_User;
+    ledger: Models.public_ledger;
+    transaction: Models.public_transaction;
   };
 };
 
@@ -435,6 +503,283 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly FriendRequest: {
+              columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly receiverId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly senderId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'PENDING'>;
+                  };
+                  readonly many: false;
+                };
+                readonly updatedAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['senderId', 'receiverId'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'FriendRequest_receiverId_idx_fe124f44';
+                  readonly prefix: 'FriendRequest_receiverId_idx';
+                  readonly columns: readonly ['receiverId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'FriendRequest_receiverId_status_idx_1f8f1a2b';
+                  readonly prefix: 'FriendRequest_receiverId_status_idx';
+                  readonly columns: readonly ['receiverId', 'status'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'FriendRequest_senderId_idx_4689c490';
+                  readonly prefix: 'FriendRequest_senderId_idx';
+                  readonly columns: readonly ['senderId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'FriendRequest';
+                    readonly columns: readonly ['senderId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'FriendRequest';
+                    readonly columns: readonly ['receiverId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly ledger: {
+              columns: {
+                readonly account: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly amount: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly transaction: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly type: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'ledger_account_idx_abd1a080';
+                  readonly prefix: 'ledger_account_idx';
+                  readonly columns: readonly ['account'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'ledger_transaction_idx_76a4c21d';
+                  readonly prefix: 'ledger_transaction_idx';
+                  readonly columns: readonly ['transaction'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'ledger';
+                    readonly columns: readonly ['account'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Account';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'ledger';
+                    readonly columns: readonly ['transaction'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'transaction';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
+            readonly transaction: {
+              columns: {
+                readonly amount: {
+                  readonly dataType: 'pg/float8';
+                  readonly codecId: 'pg/float8@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly fromAccount: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly idempotencyKey: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'PENDING'>;
+                  };
+                  readonly many: false;
+                };
+                readonly toAccount: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['idempotencyKey'] }];
+              indexes: readonly [
+                {
+                  readonly name: 'transaction_fromAccount_idx_bc199eb0';
+                  readonly prefix: 'transaction_fromAccount_idx';
+                  readonly columns: readonly ['fromAccount'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'transaction_toAccount_idx_4259303e';
+                  readonly prefix: 'transaction_toAccount_idx';
+                  readonly columns: readonly ['toAccount'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'transaction';
+                    readonly columns: readonly ['fromAccount'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Account';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'transaction';
+                    readonly columns: readonly ['toAccount'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Account';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly User: {
               columns: {
                 readonly createdAt: {
@@ -492,6 +837,18 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['ACTIVE', 'FROZEN', 'CLOSED'];
             };
+            readonly RequestStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'ACCEPTED', 'REJECTED'];
+            };
+            readonly Status: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'COMPLETED', 'FAILED', 'REVERSED'];
+            };
+            readonly TransactionType: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['DEBIT', 'CREDIT'];
+            };
           };
         };
       };
@@ -504,7 +861,16 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly Account: { readonly namespace: 'public' & NamespaceId; readonly model: 'Account' };
+    readonly FriendRequest: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'FriendRequest';
+    };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+    readonly ledger: { readonly namespace: 'public' & NamespaceId; readonly model: 'ledger' };
+    readonly transaction: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'transaction';
+    };
   };
   readonly domain: {
     readonly namespaces: {
@@ -555,6 +921,210 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly FriendRequest: {
+            readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly receiverId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly senderId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+            };
+            readonly relations: {
+              readonly receiver: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['receiverId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly sender: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['senderId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'FriendRequest';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly receiverId: { readonly column: 'receiverId' };
+                readonly senderId: { readonly column: 'senderId' };
+                readonly status: { readonly column: 'status' };
+                readonly updatedAt: { readonly column: 'updatedAt' };
+              };
+            };
+          };
+          readonly ledger: {
+            readonly fields: {
+              readonly account: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly amount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly transaction: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly type: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly accountRel: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Account';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['account'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly transactionR: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'transaction';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['transaction'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'ledger';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly account: { readonly column: 'account' };
+                readonly amount: { readonly column: 'amount' };
+                readonly id: { readonly column: 'id' };
+                readonly transaction: { readonly column: 'transaction' };
+                readonly type: { readonly column: 'type' };
+              };
+            };
+          };
+          readonly transaction: {
+            readonly fields: {
+              readonly amount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly fromAccount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly idempotencyKey: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly toAccount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+            };
+            readonly relations: {
+              readonly from: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Account';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['fromAccount'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly to: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Account';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['toAccount'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'transaction';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly amount: { readonly column: 'amount' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly fromAccount: { readonly column: 'fromAccount' };
+                readonly id: { readonly column: 'id' };
+                readonly idempotencyKey: { readonly column: 'idempotencyKey' };
+                readonly status: { readonly column: 'status' };
+                readonly toAccount: { readonly column: 'toAccount' };
+              };
+            };
+          };
           readonly User: {
             readonly fields: {
               readonly createdAt: {
@@ -590,7 +1160,30 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly receivedRequests: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'FriendRequest';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['receiverId'];
+                };
+              };
+              readonly sentRequests: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'FriendRequest';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['senderId'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'User';
               readonly namespaceId: 'public';
@@ -614,12 +1207,51 @@ type ContractBase = Omit<
               { readonly name: 'CLOSED'; readonly value: 'CLOSED' },
             ];
           };
+          readonly RequestStatus: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'PENDING'; readonly value: 'PENDING' },
+              { readonly name: 'ACCEPTED'; readonly value: 'ACCEPTED' },
+              { readonly name: 'REJECTED'; readonly value: 'REJECTED' },
+            ];
+          };
+          readonly Status: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'PENDING'; readonly value: 'PENDING' },
+              { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
+              { readonly name: 'FAILED'; readonly value: 'FAILED' },
+              { readonly name: 'REVERSED'; readonly value: 'REVERSED' },
+            ];
+          };
+          readonly TransactionType: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'DEBIT'; readonly value: 'DEBIT' },
+              { readonly name: 'CREDIT'; readonly value: 'CREDIT' },
+            ];
+          };
         };
         readonly enumMemberTypes?: {
           readonly AccountType: readonly [
             { readonly name: 'ACTIVE'; readonly value: 'ACTIVE' },
             { readonly name: 'FROZEN'; readonly value: 'FROZEN' },
             { readonly name: 'CLOSED'; readonly value: 'CLOSED' },
+          ];
+          readonly RequestStatus: readonly [
+            { readonly name: 'PENDING'; readonly value: 'PENDING' },
+            { readonly name: 'ACCEPTED'; readonly value: 'ACCEPTED' },
+            { readonly name: 'REJECTED'; readonly value: 'REJECTED' },
+          ];
+          readonly Status: readonly [
+            { readonly name: 'PENDING'; readonly value: 'PENDING' },
+            { readonly name: 'COMPLETED'; readonly value: 'COMPLETED' },
+            { readonly name: 'FAILED'; readonly value: 'FAILED' },
+            { readonly name: 'REVERSED'; readonly value: 'REVERSED' },
+          ];
+          readonly TransactionType: readonly [
+            { readonly name: 'DEBIT'; readonly value: 'DEBIT' },
+            { readonly name: 'CREDIT'; readonly value: 'CREDIT' },
           ];
         };
       };
@@ -658,6 +1290,18 @@ type ContractBase = Omit<
     readonly executionHash: ExecutionHash;
     readonly mutations: {
       readonly defaults: readonly [
+        {
+          readonly onUpdate: {
+            readonly id: 'timestampNow';
+            readonly kind: 'generator';
+            readonly params: { readonly precision: 3 };
+          };
+          readonly ref: {
+            readonly entry: 'FriendRequest';
+            readonly field: 'updatedAt';
+            readonly namespace: 'public';
+          };
+        },
         {
           readonly onCreate: {
             readonly id: 'timestampNow';

@@ -30,6 +30,8 @@ model User {
   password  String?
   createdAt DateTime           @default(now()) @onCreate(now())
   updatedAt temporal.UpdatedAt
+  sentRequests     FriendRequest[] @relation("SentRequests")
+  receivedRequests FriendRequest[] @relation("ReceivedRequests")
 }
 
 
@@ -63,10 +65,20 @@ model ledger {
   type            TransactionType   
 }
 
-model friendList {
-  sender_id       Int               
-  receiver_id     Int
-  status          RequestStatus
-  createdAt       DateTime          @default(now())         
+model FriendRequest {
+  id         Int                 @id @default(autoincrement())
+  senderId   Int
+  receiverId Int
+  status     RequestStatus       @default(PENDING)
+
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @onUpdate(now())
+
+  sender     User @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId, status])
 }
-//TODO: contract emit and db init pending
+
+

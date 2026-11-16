@@ -6,3 +6,13 @@ Content-Type: application/json
   "email": "towhid@gmail.com",
   "password": "sheik7pro"
 }
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiaWF0IjoxNzk0NzQxMDMyLCJleHAiOjE3OTQ3NDQ2MzJ9.JmEGi0jfzvvTxngcCaaAd6UEjI3GQADJQfYo6w8KO3U
+###Send friend request
+POST http://localhost:5002/api/requests/send
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "receiverName": "Atif Aslam" 
+}
