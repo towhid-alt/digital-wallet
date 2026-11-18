@@ -32,7 +32,7 @@ final class UserNotFound extends FriendRequestState{
 }
 
 final class RequestFetched extends FriendRequestState{
-  final List<String> requests;
+  final List<Map<String, dynamic>> requests;
 
   const RequestFetched({required this.requests});
 
@@ -41,3 +41,21 @@ final class RequestFetched extends FriendRequestState{
 }
 
 final class RequestFetchError extends FriendRequestState{}
+
+final class RequestAccepted extends FriendRequestState{
+  final int requestId;
+
+  const RequestAccepted({required this.requestId});
+
+  @override
+  List<Object> get props => [requestId];
+}
+
+final class RequestRejected extends FriendRequestState{
+  final int requestId;
+
+  const RequestRejected({required this.requestId});
+
+  @override
+  List<Object> get props => [requestId];
+}

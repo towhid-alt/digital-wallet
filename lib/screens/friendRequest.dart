@@ -12,7 +12,7 @@ class requestScreen extends StatefulWidget {
 class _requestScreenState extends State<requestScreen> {
   final TextEditingController _usernameController = TextEditingController();
   String searchResultText = '';
-  List<String> friendRequest = [];
+  List<Map<String, dynamic>> friendRequest = [];
 
   @override
   void initState(){
@@ -36,6 +36,10 @@ class _requestScreenState extends State<requestScreen> {
     context.read<FriendRequestBloc>().add(listRequested());
   }
 
+  void _acceptRequest(int requestId){
+    context.read<FriendRequestBloc>().add(AcceptRequest(requestId: requestId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FriendRequestBloc, FriendRequestState>(
@@ -48,6 +52,9 @@ class _requestScreenState extends State<requestScreen> {
           }
           if(state is RequestFetched){
             friendRequest = state.requests;
+          }
+          if(state is RequestAccepted){
+            friendRequest.removeWhere((request) => request['id'] == state.requestId);
           }
       },
       builder: (context, state) {
@@ -129,8 +136,12 @@ class _requestScreenState extends State<requestScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
-                        final senderName = friendRequest[index];
+                        final request = friendRequest[index];
+                        final requestId = request['id'] as int;
+                        final senderName =
+                            request['sender']['username'] as String;
                         return ListTile(
+                          key: ValueKey(requestId),
                           title: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -147,16 +158,21 @@ class _requestScreenState extends State<requestScreen> {
                               const SizedBox(width: 445),
                               IconButton(
                                 onPressed: () {
-                                  
+                                    _acceptRequest(requestId);
                                 },
                                 icon: const Icon(
                                   Icons.check,
                                   color: Colors.green,
                                 ),
                               ),
-                              const Icon(
-                                Icons.cancel_rounded,
-                                color: Colors.red,
+                              IconButton(
+                                onPressed: () {
+
+                                },
+                                icon: const Icon(
+                                  Icons.cancel_rounded,
+                                  color: Colors.red,
+                                ),
                               ),
                             ],
                           ),

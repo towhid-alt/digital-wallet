@@ -24,3 +24,21 @@ class SendRequest extends FriendRequestEvent {
   @override
   List<Object> get props => [receiverName];
 }
+
+class AcceptRequest extends FriendRequestEvent {
+  final int requestId;
+
+  const AcceptRequest({required this.requestId});
+
+  @override
+  List<Object> get props => [requestId];
+}
+
+class RejectRequest extends FriendRequestEvent {
+  final int requestId;
+
+  const RejectRequest({required this.requestId});
+
+  @override
+  List<Object> get props => [requestId];
+}

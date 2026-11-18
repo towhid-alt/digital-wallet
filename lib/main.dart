@@ -1,4 +1,5 @@
 import 'package:digital_wallet/bloc/auth/auth_bloc.dart';
+import 'package:digital_wallet/bloc/fetchFriends/friends_bloc.dart';
 import 'package:digital_wallet/bloc/friendRequests/friend_request_bloc.dart';
 import 'package:digital_wallet/presentation/app_router.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  final String serverUrl = 'http://localhost:5002'; 
   MyApp({super.key});
   final AppRouter _appRouter = AppRouter();
 
@@ -16,12 +18,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => AuthBloc(authService: AuthService(baseUrl: 'http://localhost:5002'),
+        BlocProvider(create: (context) => AuthBloc(authService: AuthService(baseUrl: serverUrl),
            
         ),
         ),
 
-        BlocProvider(create: (context) => FriendRequestBloc(fetchService: FetchService(baseurl: 'http://localhost:5002')))
+        BlocProvider(create: (context) => FriendRequestBloc(fetchService: FetchService(baseurl: serverUrl))),
+
+        BlocProvider(create: (context) => FriendsBloc(fetchFriendsService: FetchFriendsService(baseurl: serverUrl)))
 
       ],
       child: MaterialApp(

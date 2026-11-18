@@ -15,6 +15,8 @@ class FriendRequestBloc extends Bloc<FriendRequestEvent, FriendRequestState> {
         super(RequestInitial()) {
     on<listRequested>(_fetchFriendRequests);
     on<SendRequest>(_sendRequest);
+    on<AcceptRequest>(_acceptRequest);
+    on<RejectRequest>(_rejectRequest);
   }
   /**
    * Fetch Friend Requests event handler
@@ -23,7 +25,6 @@ class FriendRequestBloc extends Bloc<FriendRequestEvent, FriendRequestState> {
     listRequested event,
     Emitter<FriendRequestState> emit,
   ) async{
-    print('Inside fetchFriendRequest event handler...');
     emit (RequestLoading());
 
     final response = await _fetchService.fetch();
@@ -51,7 +52,34 @@ class FriendRequestBloc extends Bloc<FriendRequestEvent, FriendRequestState> {
     }
 
   }
+  /**
+ * Accept Friend Request
+ */
+Future<void> _acceptRequest (
+  AcceptRequest event,
+  Emitter<FriendRequestState> emit
+) async {
+  final response = await _fetchService.accept(requestId: event.requestId);
+  if(response['success']){
+    emit(RequestAccepted(requestId: event.requestId));
+  }
 }
+
+ /**
+ * Rejected Friend Request
+ */
+Future<void> _rejectRequest (
+  RejectRequest event,
+  Emitter<FriendRequestState> emit
+) async {
+  final response = await _fetchService.reject(requestId: event.requestId);
+  if(response['success']){
+    emit(RequestRejected(requestId: event.requestId));
+  }
+}
+
+}
+
 /**
  * Fetch Service for API calls
  */
@@ -78,7 +106,7 @@ class FetchService{
       if(response.statusCode == 200) {
       return {
         'success': true,
-        'requests': List<String>.from(data['requests']),
+        'requests': List<Map<String, dynamic>>.from(data['requests']),
       };
     } else {
       return {'success': false, 'message': data['message']};
@@ -118,6 +146,61 @@ class FetchService{
     }
     } catch(e){
       return {'success': false, 'error': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  /**
+   * Accept Request
+   */
+  Future<Map<String, dynamic>> accept({
+    required int requestId
+  }) async {
+    try {
+      final response = await http.put(Uri.parse(
+      '$baseurl/api/requests/accept'),
+      headers: {
+        'Content-Type': 'application/json',
+        if(AuthService.accessToken != null)
+          'Authorization': 'Bearer ${AuthService.accessToken}',
+      },
+      body: jsonEncode({
+        'requestId': requestId
+      })
+    );
+    print('Response from server-> ${response.statusCode.toString()}',);
+    final data = jsonDecode(response.body);
+    if(response.statusCode == 200){
+      return {'success': true, 'message': data['message']};
+    } else {
+      return {'success': false, 'message': data['message']};
+    }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  /**
+   * Reject Accept
+   */
+  Future<Map<String, dynamic>> reject({
+    required int requestId
+  }) async {
+    final response = await http.put(Uri.parse(
+      '$baseurl/api/requests/reject'),
+      headers: {
+        'Content-Type': 'application/json',
+        if(AuthService.accessToken != null)
+          'Authorization': 'Bearer ${AuthService.accessToken}',
+      },
+      body: jsonEncode({
+        'requestId': requestId
+      })
+    );
+    final data = jsonDecode(response.body);
+    if(response.statusCode == 200){
+      return {'success': true, 'message': data['message']};
+    } else {
+      return {'success': false, 'message': data['message']};
     }
   }
 }

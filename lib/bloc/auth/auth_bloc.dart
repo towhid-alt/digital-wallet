@@ -63,7 +63,6 @@ class AuthService {
   }) async {
     try {
       accessToken = null;
-      print('Inside AuthService: login() called with email: $email');
       final response = await http.post(
         Uri.parse('$baseUrl/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
@@ -73,8 +72,7 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        accessToken = data['token'] as String?;
-        print('Login successful for user: $email');
+        accessToken = data['token'] as String?;//TODO: Understand how is it being accessed from friendRequest bloc
         return {'success': true, 'message': data['message'], 'userId': data['userId']};
       } else {
         return {'success': false, 'message': data['message']};
@@ -89,7 +87,6 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    print('Inside AuthService: signUp() called with username: $username, email: $email');
     try{
       final response = await http.post(
       Uri.parse('$baseUrl/api/auth/register'),
