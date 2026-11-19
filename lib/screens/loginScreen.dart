@@ -22,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void handleLogin() {
-    print('Running handleLogin()');
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 

@@ -28,7 +28,6 @@ class FriendRequestBloc extends Bloc<FriendRequestEvent, FriendRequestState> {
     emit (RequestLoading());
 
     final response = await _fetchService.fetch();
-
     if(response['success']){
       emit (RequestFetched(requests: response['requests']));
     } else {
@@ -123,7 +122,6 @@ class FetchService{
     required String receiverName,
   }) async {
     try{
-      print('Inside send() function of FriendRequestBloc...');
       final response = await http.post(
         Uri.parse('$baseurl/api/requests/send'),
         headers: {
@@ -135,10 +133,7 @@ class FetchService{
           'receiverName': receiverName
         })
       );
-      print('Response received from server for friend Request');
       final data = jsonDecode(response.body);
-      print('Data Received from server for Friend Request-> ');
-      print(data);
       if(response.statusCode == 200) {
       return {'success': true, 'message': data['message']};
     } else {
@@ -167,7 +162,6 @@ class FetchService{
         'requestId': requestId
       })
     );
-    print('Response from server-> ${response.statusCode.toString()}',);
     final data = jsonDecode(response.body);
     if(response.statusCode == 200){
       return {'success': true, 'message': data['message']};

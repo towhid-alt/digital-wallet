@@ -19,7 +19,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     SignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
-    print('Inside AuthBloc: SignUpRequested event received');
     emit(AuthLoading());
 
     final response = await authService.signUp(username: event.username, email: event.email, password: event.password);
@@ -100,6 +99,7 @@ class AuthService {
     final data = jsonDecode(response.body);
 
     if(response.statusCode == 200) {
+      accessToken = data['token'] as String?;
       return {'success': true, 'message': data['message']};
     } else {
       return {'success': false, 'message': data['message']};

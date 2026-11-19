@@ -1,6 +1,21 @@
 const express = require('express')
 const { db } = require('../prisma/db.ts')
 const { and, or } = require("@prisma/orm-postgres/orm-client")
+const redis = require('../client')
+
+const FRIENDS_CACHE_TTL_SECONDS = 300
+
+function friendsCacheKey(userId) {
+    return `friends:${userId}`
+}
+
+async function invalidateFriendsCache(userIds) {
+    try {
+        await redis.del(...userIds.map(friendsCacheKey))
+    } catch (error) {
+        console.error('Error invalidating friends cache:', error)
+    }
+}
 
 /**
  * Send Friend Request Controller function
@@ -17,7 +32,6 @@ async function sendRequestController(req, res) {
                 receiverId: userExists.id,
                 updatedAt: new Date()
             })
-            console.log('Friend Request addedd to DB successfully')
             return res.status(200).json({ message: "Request Sent successfully" })
         } else {
             return res.status(400).json({ message: "User not found" })
@@ -34,13 +48,11 @@ async function sendRequestController(req, res) {
 async function fetchRequests(req, res) {
     const user = req.user
     try {
-        console.log("Inside fetchRequests controller...")
         const requestList = await db.orm.public.FriendRequest.where((p) => and(p.receiverId.eq(user.id), p.status.eq('PENDING')))
             .include("sender", (sender) => sender.select("username"))
             .select("id")
             .all()
         if (requestList) {
-            console.log("Friend request API returns -> ", requestList)
             return res.status(200).json({ requests: requestList })
         }
         else {
@@ -58,14 +70,19 @@ async function fetchRequests(req, res) {
 async function requestAccepted(req, res) {
     const { requestId } = req.body
     try {
-        const updateRequest = db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
-            .update({ status: 'ACCEPTED' })
-        if (updateRequest != null) {
-            return res.status(200).json({ message: "Updated request status to ACCEPTED" })
-        } else {
-            return res.status(401).json({ message: "Can not update request status" })
+        const request = await db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
+            .select("senderId", "receiverId")
+            .first()
+        if (!request) {
+            return res.status(404).json({ message: "Friend request not found" })
         }
+
+        await db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
+            .update({ status: 'ACCEPTED' })
+        await invalidateFriendsCache([request.senderId, request.receiverId])
+        return res.status(200).json({ message: "Updated request status to ACCEPTED" })
     } catch (e) {
+        console.error('Error accepting friend request:', e)
         return res.status(500).json({ message: "Internal server error" })
     }
 }
@@ -76,14 +93,19 @@ async function requestAccepted(req, res) {
 async function requestRejected(req, res) {
     const { requestId } = req.body
     try {
-        const updateRequest = db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
-            .update({ status: 'REJECTED' })
-        if (updateRequest != null) {
-            return res.status(200).json({ message: "Updated request status to REJECTED" })
-        } else {
-            return res.status(401).json({ message: "Can not update request status" })
+        const request = await db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
+            .select("senderId", "receiverId")
+            .first()
+        if (!request) {
+            return res.status(404).json({ message: "Friend request not found" })
         }
+
+        await db.orm.public.FriendRequest.where((p) => p.id.eq(requestId))
+            .update({ status: 'REJECTED' })
+        await invalidateFriendsCache([request.senderId, request.receiverId])
+        return res.status(200).json({ message: "Updated request status to REJECTED" })
     } catch (e) {
+        console.error('Error rejecting friend request:', e)
         return res.status(500).json({ message: "Internal server error" })
     }
 }
@@ -93,7 +115,22 @@ async function requestRejected(req, res) {
  */
 async function fetchFriends(req, res) {
     const user = req.user
+    const cacheKey = friendsCacheKey(user.id)
     try {
+        try {
+            const cachedFriends = await redis.get(cacheKey)
+            if (cachedFriends !== null) {
+                const friends = JSON.parse(cachedFriends)
+                if (Array.isArray(friends)) {
+                    return res.status(200).json(friends)
+                }
+                console.error('Invalid friends cache value; fetching friends from database')
+                await redis.del(cacheKey)
+            }
+        } catch (error) {
+            console.error('Error reading friends cache:', error)
+        }
+
         const friendRequests = await db.orm.public.FriendRequest.where((p) => and(
             or(
                 p.senderId.eq(user.id), p.receiverId.eq(user.id)
@@ -109,7 +146,19 @@ async function fetchFriends(req, res) {
             const friend = request.senderId === user.id ? request.receiver : request.sender
             return { friendsName: friend.username, friendsId: friend.id }
         })
-        return res.status(200).json({ friends })
+
+        try {
+            await redis.set(
+                cacheKey,
+                JSON.stringify(friends),
+                'EX',
+                FRIENDS_CACHE_TTL_SECONDS
+            )
+        } catch (error) {
+            console.error('Error caching friends:', error)
+        }
+
+        return res.status(200).json( friends )
     } catch (e) {
         console.error('Error fetching friends:', e)
         return res.status(500).json({ message: 'Internal server error' })

@@ -9,6 +9,6 @@ router.post('/send', authMiddleware, sendRequestController)
 router.post('/fetch', authMiddleware, fetchRequests)
 router.put('/accept', authMiddleware, requestAccepted)
 router.put('/reject', authMiddleware, requestRejected)
-router.put('/fetchFriends', authMiddleware, fetchFriends)
+router.get('/fetchFriends', authMiddleware, fetchFriends)
 
 module.exports= router;

@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
         const account = db.orm.public.Account.create({
             userId: user.id
         })
-        res.status(200).json({ message: "User created successfully", userId: user.id })
+        res.status(200).json({ message: "User created successfully", userId: user.id, token })
     } catch (e) {
         console.error("Error creating user:", error)
         res.status(500).json({ message: "Internal server error" })

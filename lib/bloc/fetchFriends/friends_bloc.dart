@@ -36,8 +36,8 @@ class FetchFriendsService {
 
   Future<Map<String, dynamic>> fetch() async {
     try {
-      final response = await http.put(
-        Uri.parse('$baseurl/api/fetchFriends'),
+      final response = await http.get(
+        Uri.parse('$baseurl/api/requests/fetchFriends'),
         headers: {
           'Content-Type': 'application/json',
           if (AuthService.accessToken != null)
@@ -46,9 +46,21 @@ class FetchFriendsService {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        final friends = data is List
+            ? data
+            : data is Map<String, dynamic>
+                ? data['friends']
+                : null;
+        if (friends is! List) {
+          return {
+            'success': false,
+            'error': 'Invalid friends response',
+          };
+        }
+
         return {
           'success': true,
-          'list': List<Map<String, dynamic>>.from(data['friends']),
+          'list': List<Map<String, dynamic>>.from(friends),
         };
       } else {
         return {'success': false, 'message': data['message']};
