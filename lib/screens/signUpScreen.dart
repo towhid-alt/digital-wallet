@@ -53,7 +53,11 @@ class _SignupscreenState extends State<Signupscreen> {
         // TODO: implement listener
         if (state is AuthAuthenticated) {
           // Navigate to home screen
-          Navigator.pushNamed(context, '/home');
+          Navigator.pushNamed(
+            context,
+            '/home',
+            arguments: {'currentUser': state.username},
+          );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -175,7 +179,6 @@ class _SignupscreenState extends State<Signupscreen> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              
                               //TODO: Navigate to login screen
                               Navigator.pushNamed(context, '/login'); 
                             },

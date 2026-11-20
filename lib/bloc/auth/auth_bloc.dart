@@ -28,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (session == null) {
         emit(AuthUnauthenticated());
       } else {
-        emit(AuthAuthenticated(userId: session['userId']));
+        emit(AuthAuthenticated(userId: session['userId'], username: session['userId'].toString()));
       }
     } catch (error) {
       emit(AuthError(message: 'Unable to restore saved session: $error'));
@@ -48,7 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (response['success']) {
-      emit(AuthAuthenticated(userId: response['userId']));
+      emit(AuthAuthenticated(userId: response['userId'], username: response['username']));
     } else {
       emit(
         AuthError(
@@ -71,7 +71,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       password: event.password,
     );
     if (response['success']) {
-      emit(AuthAuthenticated(userId: response['userId']));
+      emit(AuthAuthenticated(userId: response['userId'], username: response['username']));
     } else {
       emit(
         AuthError(
@@ -162,6 +162,7 @@ class AuthService {
           'success': true,
           'message': data['message'],
           'userId': data['userId'],
+          'username': data['username']
         };
       } else {
         return {'success': false, 'message': data['message']};
@@ -191,6 +192,7 @@ class AuthService {
       if (response.statusCode == 200) {
         final token = data['token'] as String?;
         final userId = data['userId'];
+        final username = data['username'];
         if (token == null || userId == null) {
           return {
             'success': false,
@@ -198,7 +200,7 @@ class AuthService {
           };
         }
         await _saveSession(token: token, userId: userId);
-        return {'success': true, 'message': data['message'], 'userId': userId};
+        return {'success': true, 'message': data['message'], 'userId': userId, 'username': username};
       } else {
         return {'success': false, 'message': data['message']};
       }

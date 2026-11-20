@@ -10,7 +10,8 @@
     "http": "^0.0.1-security",
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.4"
   },
   "name": "backend",
   "version": "1.0.0",

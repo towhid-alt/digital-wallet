@@ -4,13 +4,14 @@ import 'package:digital_wallet/bloc/friendRequests/friend_request_bloc.dart';
 import 'package:digital_wallet/presentation/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:digital_wallet/confiq/appConfigue.dart';
 
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final String serverUrl = 'http://localhost:5002'; 
+  final String serverUrl = AppConfig.baseUrl;
   MyApp({super.key});
   final AppRouter _appRouter = AppRouter();
 

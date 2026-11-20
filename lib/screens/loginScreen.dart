@@ -42,7 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
     listener: (context, state) {
         if (state is AuthAuthenticated) {
           // Navigate to home screen
-          Navigator.pushNamed(context, '/home');
+          Navigator.pushNamed(
+            context,
+            '/home',
+            arguments: {'currentUser': state.username},
+          );
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

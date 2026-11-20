@@ -15,7 +15,14 @@ class AppRouter {
       case '/login':
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case '/home':
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        final args = settings.arguments;
+        final currentUser = args is Map && args['currentUser'] is String
+            ? args['currentUser'] as String
+            : '';
+
+        return MaterialPageRoute(
+          builder: (_) => HomeScreen(currentUser: currentUser),
+        );
       case '/chatHome':
         return MaterialPageRoute(builder: (_) => const chatHomeScreen());
       case '/friendRequest':
@@ -38,7 +45,7 @@ class _AuthGate extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is AuthAuthenticated) {
-          return const HomeScreen();
+          return HomeScreen(currentUser: state.username);
         }
         if (state is AuthError) {
           return Scaffold(
