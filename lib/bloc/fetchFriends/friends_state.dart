@@ -13,11 +13,12 @@ final class FriendsLoading extends FriendsState{}
 
 final class FriendsLoaded extends FriendsState {
   final List<Map<String, dynamic>> friendList;
+  final String currentUserId;
 
-  const FriendsLoaded({required this.friendList});
+  const FriendsLoaded({required this.friendList, required this.currentUserId});
 
   @override
-  List<Object> get props => [friendList];
+  List<Object> get props => [friendList, currentUserId];
 }
 
 final class FriendsError extends FriendsState {}

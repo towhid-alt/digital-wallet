@@ -20,9 +20,8 @@ class FriendsBloc extends Bloc<FriendsEvent, FriendsState> {
   ) async {
     emit(FriendsLoading());
     final response = await _fetchFriendsService.fetch();
-
     if (response['success']) {
-      emit(FriendsLoaded(friendList: response['list']));
+      emit(FriendsLoaded(friendList: response['list'], currentUserId: response['currentUserId']));
     } else {
       emit(FriendsError());
     }
@@ -57,10 +56,10 @@ class FetchFriendsService {
             'error': 'Invalid friends response',
           };
         }
-
         return {
           'success': true,
           'list': List<Map<String, dynamic>>.from(friends),
+          'currentUserId': data['currentUserId'].toString()
         };
       } else {
         return {'success': false, 'message': data['message']};

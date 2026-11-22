@@ -1,5 +1,6 @@
 import 'package:digital_wallet/bloc/auth/auth_bloc.dart';
 import 'package:digital_wallet/screens/chatHome.dart';
+import 'package:digital_wallet/screens/chatScreen.dart';
 import 'package:digital_wallet/screens/friendRequest.dart';
 import 'package:digital_wallet/screens/homeScreen.dart';
 import 'package:digital_wallet/screens/loginScreen.dart';
@@ -27,10 +28,22 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const chatHomeScreen());
       case '/friendRequest':
         return MaterialPageRoute(builder: (_) => const requestScreen());
+
+      case '/chat':
+        final args = settings.arguments as Map<String, dynamic>;
+        final receiverId = args['receiverId'] ?? '';
+        final receiverName = args['receiverName'] ?? '';
+        final currentUserId = args['currentUserId'] ?? '';
+        
+        return MaterialPageRoute(
+          builder: (_) =>
+              ChatScreen(currentUserId: currentUserId, receiverId: receiverId, receiverName: receiverName),
+        );
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(child: Text('No route defined for ${settings.name}')),
+            body: Center(child: Text('No route defined for ${settings.name}',
+            style: TextStyle(color: Colors.black, fontSize: 30),)),
           ),
         );
     }

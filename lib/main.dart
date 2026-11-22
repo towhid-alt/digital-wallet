@@ -1,4 +1,5 @@
 import 'package:digital_wallet/bloc/auth/auth_bloc.dart';
+import 'package:digital_wallet/bloc/chat/chat_bloc.dart';
 import 'package:digital_wallet/bloc/fetchFriends/friends_bloc.dart';
 import 'package:digital_wallet/bloc/friendRequests/friend_request_bloc.dart';
 import 'package:digital_wallet/presentation/app_router.dart';
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
 
         BlocProvider(create: (context) => FriendRequestBloc(fetchService: FetchService(baseurl: serverUrl))),
 
-        BlocProvider(create: (context) => FriendsBloc(fetchFriendsService: FetchFriendsService(baseurl: serverUrl)))
+        BlocProvider(create: (context) => FriendsBloc(fetchFriendsService: FetchFriendsService(baseurl: serverUrl))),
+
+        BlocProvider(create: (context) => ChatBloc(chatService: ChatService(baseurl: serverUrl))),
 
       ],
       child: MaterialApp(

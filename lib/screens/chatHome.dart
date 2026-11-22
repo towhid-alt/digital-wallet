@@ -33,24 +33,39 @@ class _chatHomeScreenState extends State<chatHomeScreen> {
         }
 
         if (state is FriendsLoaded) {
+          var currentUserId = state.currentUserId; //FIXME:
           if (state.friendList.isEmpty) {
             return const Center(child: Text('No friends found'));
           }
 
           return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 22, 22, 23),
+            backgroundColor: const Color.fromARGB(255, 22, 22, 23),
             body: ListView.separated(
               itemBuilder: (context, index) {
                 final friend = state.friendList[index];
                 final username =
                     friend['friendsName']?.toString() ?? 'Unknown user';
-            
+                final friendsId =
+                    friend['friendsId']?.toString() ?? 'Unknown userId';
                 return ListTile(
                   title: Text(
                     username,
                     style: const TextStyle(color: Colors.white),
                   ),
-                  onTap: () {},
+                  onTap: () {
+                    /*print(
+                      '👹Navigating with currentId: $currentUserId, receiverId: $friendsId & receiverName: $username',
+                    );*/
+                    Navigator.pushNamed(
+                      context,
+                      '/chat',
+                      arguments: {
+                        'currentUserId': currentUserId,
+                        'receiverId': friendsId,
+                        'receiverName': username,
+                      },
+                    );
+                  },
                 );
               },
               separatorBuilder: (context, index) =>

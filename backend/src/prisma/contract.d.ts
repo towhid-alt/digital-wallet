@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'1b7a86665429ddd5b863af15543de60cf2e1a2a774f781ded1bf954231c45e35'>;
+  StorageHashBase<'c2f14cb0550bbb25382df25b42bedb844b3ada19c9564ae08f5ce4001a879614'>;
 export type ExecutionHash =
   ExecutionHashBase<'c90182a9ddfa2262541a0cd3a74501d84f44e35a796a9055fcbca6062a9199d2'>;
 export type ProfileHash =
@@ -293,6 +293,12 @@ type FieldTypeOverrides = {
       readonly ledger: {
         readonly type: { readonly output: 'DEBIT' | 'CREDIT'; readonly input: 'DEBIT' | 'CREDIT' };
       };
+      readonly Owes: {
+        readonly status: {
+          readonly output: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PAID';
+          readonly input: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PAID';
+        };
+      };
       readonly transaction: {
         readonly status: {
           readonly output: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REVERSED';
@@ -334,6 +340,12 @@ type ColumnTypeOverrides = {
     };
     readonly ledger: {
       readonly type: { readonly output: 'DEBIT' | 'CREDIT'; readonly input: 'DEBIT' | 'CREDIT' };
+    };
+    readonly Owes: {
+      readonly status: {
+        readonly output: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PAID';
+        readonly input: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PAID';
+      };
     };
     readonly transaction: {
       readonly status: {
@@ -378,6 +390,17 @@ export namespace Models {
     sender: public_User;
     readonly [RelationKeys]?: 'receiver' | 'sender';
   };
+  export type public_Owes = {
+    amount: FieldOutputTypes['public']['Owes']['amount'];
+    createdAt: FieldOutputTypes['public']['Owes']['createdAt'];
+    id: FieldOutputTypes['public']['Owes']['id'];
+    receiverId: FieldOutputTypes['public']['Owes']['receiverId'];
+    senderId: FieldOutputTypes['public']['Owes']['senderId'];
+    status: FieldOutputTypes['public']['Owes']['status'];
+    receiver: public_User;
+    sender: public_User;
+    readonly [RelationKeys]?: 'receiver' | 'sender';
+  };
   export type public_User = {
     createdAt: FieldOutputTypes['public']['User']['createdAt'];
     email: FieldOutputTypes['public']['User']['email'];
@@ -417,6 +440,7 @@ export declare const models: {
   public: {
     Account: Models.public_Account;
     FriendRequest: Models.public_FriendRequest;
+    Owes: Models.public_Owes;
     User: Models.public_User;
     ledger: Models.public_ledger;
     transaction: Models.public_transaction;
@@ -682,6 +706,98 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly Owes: {
+              columns: {
+                readonly amount: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'autoincrement()';
+                  };
+                  readonly many: false;
+                };
+                readonly receiverId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly senderId: {
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly status: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/text@1', 'PENDING'>;
+                  };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'Owes_receiverId_idx_fe124f44';
+                  readonly prefix: 'Owes_receiverId_idx';
+                  readonly columns: readonly ['receiverId'];
+                  readonly unique: false;
+                },
+                {
+                  readonly name: 'Owes_senderId_idx_4689c490';
+                  readonly prefix: 'Owes_senderId_idx';
+                  readonly columns: readonly ['senderId'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Owes';
+                    readonly columns: readonly ['senderId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Owes';
+                    readonly columns: readonly ['receiverId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
+            };
             readonly transaction: {
               columns: {
                 readonly amount: {
@@ -837,6 +953,10 @@ type ContractBase = Omit<
               readonly kind: 'valueSet';
               readonly values: readonly ['ACTIVE', 'FROZEN', 'CLOSED'];
             };
+            readonly OweStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'ACCEPTED', 'REJECTED', 'PAID'];
+            };
             readonly RequestStatus: {
               readonly kind: 'valueSet';
               readonly values: readonly ['PENDING', 'ACCEPTED', 'REJECTED'];
@@ -865,6 +985,7 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'FriendRequest';
     };
+    readonly Owes: { readonly namespace: 'public' & NamespaceId; readonly model: 'Owes' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
     readonly ledger: { readonly namespace: 'public' & NamespaceId; readonly model: 'ledger' };
     readonly transaction: {
@@ -1050,6 +1171,70 @@ type ContractBase = Omit<
               };
             };
           };
+          readonly Owes: {
+            readonly fields: {
+              readonly amount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-date@1';
+                  readonly typeParams: { readonly precision: 3 };
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly receiverId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly senderId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
+              readonly status: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly receiver: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['receiverId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly sender: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['senderId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'Owes';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly amount: { readonly column: 'amount' };
+                readonly createdAt: { readonly column: 'createdAt' };
+                readonly id: { readonly column: 'id' };
+                readonly receiverId: { readonly column: 'receiverId' };
+                readonly senderId: { readonly column: 'senderId' };
+                readonly status: { readonly column: 'status' };
+              };
+            };
+          };
           readonly transaction: {
             readonly fields: {
               readonly amount: {
@@ -1207,6 +1392,15 @@ type ContractBase = Omit<
               { readonly name: 'CLOSED'; readonly value: 'CLOSED' },
             ];
           };
+          readonly OweStatus: {
+            readonly codecId: 'pg/text@1';
+            readonly members: readonly [
+              { readonly name: 'PENDING'; readonly value: 'PENDING' },
+              { readonly name: 'ACCEPTED'; readonly value: 'ACCEPTED' },
+              { readonly name: 'REJECTED'; readonly value: 'REJECTED' },
+              { readonly name: 'PAID'; readonly value: 'PAID' },
+            ];
+          };
           readonly RequestStatus: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
@@ -1237,6 +1431,12 @@ type ContractBase = Omit<
             { readonly name: 'ACTIVE'; readonly value: 'ACTIVE' },
             { readonly name: 'FROZEN'; readonly value: 'FROZEN' },
             { readonly name: 'CLOSED'; readonly value: 'CLOSED' },
+          ];
+          readonly OweStatus: readonly [
+            { readonly name: 'PENDING'; readonly value: 'PENDING' },
+            { readonly name: 'ACCEPTED'; readonly value: 'ACCEPTED' },
+            { readonly name: 'REJECTED'; readonly value: 'REJECTED' },
+            { readonly name: 'PAID'; readonly value: 'PAID' },
           ];
           readonly RequestStatus: readonly [
             { readonly name: 'PENDING'; readonly value: 'PENDING' },

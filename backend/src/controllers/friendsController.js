@@ -11,7 +11,7 @@ function friendsCacheKey(userId) {
 
 async function invalidateFriendsCache(userIds) {
     try {
-        await redis.del(...userIds.map(friendsCacheKey))
+        await redis.del(...userIds.map(friendsCacheKey))//Spread operator
     } catch (error) {
         console.error('Error invalidating friends cache:', error)
     }
@@ -122,7 +122,7 @@ async function fetchFriends(req, res) {
             if (cachedFriends !== null) {
                 const friends = JSON.parse(cachedFriends)
                 if (Array.isArray(friends)) {
-                    return res.status(200).json(friends)
+                    return res.status(200).json({ friends, currentUserId: user.id })
                 }
                 console.error('Invalid friends cache value; fetching friends from database')
                 await redis.del(cacheKey)
@@ -157,8 +157,7 @@ async function fetchFriends(req, res) {
         } catch (error) {
             console.error('Error caching friends:', error)
         }
-
-        return res.status(200).json( friends )
+        return res.status(200).json({ friends, currentUserId: user.id })
     } catch (e) {
         console.error('Error fetching friends:', e)
         return res.status(500).json({ message: 'Internal server error' })
