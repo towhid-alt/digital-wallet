@@ -336,6 +336,13 @@
                   }
                 }
               },
+              "detail": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -412,6 +419,9 @@
                 },
                 "createdAt": {
                   "column": "createdAt"
+                },
+                "detail": {
+                  "column": "detail"
                 },
                 "id": {
                   "column": "id"
@@ -1032,6 +1042,11 @@
                     "precision": 3
                   }
                 },
+                "detail": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/int4@1",
                   "dataType": "pg/int4",
@@ -1492,7 +1507,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "c2f14cb0550bbb25382df25b42bedb844b3ada19c9564ae08f5ce4001a879614"
+    "storageHash": "a9db90e1cff10e49dabb55e43b866c8f67439f7d699d2c383cab12371f4e0863"
   },
   "execution": {
     "executionHash": "c90182a9ddfa2262541a0cd3a74501d84f44e35a796a9055fcbca6062a9199d2",

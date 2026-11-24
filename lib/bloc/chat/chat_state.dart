@@ -11,13 +11,21 @@ final class ChatInitial extends ChatState {}
 
 final class ChatLoading extends ChatState {}
 
-final class ChatLoaded extends ChatState {
-  final List<Map<String,dynamic>> chats;
+final class ChatConnected extends ChatState {
+  final List<Message> chats;
+  final bool isConnected;
 
-  const ChatLoaded({required this.chats});
+  const ChatConnected({required this.chats, required this.isConnected});
 
   @override
   List<Object> get props => [chats];
 }
 
-final class ChatError extends ChatState {}
+final class ChatError extends ChatState {
+  final String error;
+
+  const ChatError({required this.error});
+
+  @override
+  List<Object> get props => [error];
+}

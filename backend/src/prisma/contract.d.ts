@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'c2f14cb0550bbb25382df25b42bedb844b3ada19c9564ae08f5ce4001a879614'>;
+  StorageHashBase<'a9db90e1cff10e49dabb55e43b866c8f67439f7d699d2c383cab12371f4e0863'>;
 export type ExecutionHash =
   ExecutionHashBase<'c90182a9ddfa2262541a0cd3a74501d84f44e35a796a9055fcbca6062a9199d2'>;
 export type ProfileHash =
@@ -393,6 +393,7 @@ export namespace Models {
   export type public_Owes = {
     amount: FieldOutputTypes['public']['Owes']['amount'];
     createdAt: FieldOutputTypes['public']['Owes']['createdAt'];
+    detail: FieldOutputTypes['public']['Owes']['detail'];
     id: FieldOutputTypes['public']['Owes']['id'];
     receiverId: FieldOutputTypes['public']['Owes']['receiverId'];
     senderId: FieldOutputTypes['public']['Owes']['senderId'];
@@ -720,6 +721,12 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                   readonly typeParams: { readonly precision: 3 };
+                  readonly many: false;
+                };
+                readonly detail: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
                   readonly many: false;
                 };
                 readonly id: {
@@ -1185,6 +1192,10 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly detail: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
@@ -1228,6 +1239,7 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly amount: { readonly column: 'amount' };
                 readonly createdAt: { readonly column: 'createdAt' };
+                readonly detail: { readonly column: 'detail' };
                 readonly id: { readonly column: 'id' };
                 readonly receiverId: { readonly column: 'receiverId' };
                 readonly senderId: { readonly column: 'senderId' };

@@ -93,6 +93,7 @@ model Owes {
   senderId      Int
   receiverId    Int
   amount        Int
+  detail        Text
   status        OweStatus           @default(PENDING)
   createdAt     DateTime            @default(now())
 

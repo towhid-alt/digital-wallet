@@ -16,3 +16,40 @@ class FetchChat extends ChatEvent {
   @override
   List<Object> get props => [currentUserId, receiverId];
 }
+
+class ConnectSocketEvent extends ChatEvent {
+  final String userId;
+
+  const ConnectSocketEvent({required this.userId});
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class DisconnectSocketEvent extends ChatEvent {}
+
+class ReceiveMessageEvent extends ChatEvent {
+  final Message chat;
+
+  const ReceiveMessageEvent({required this.chat});
+
+  @override
+  List<Object> get props => [chat];
+}
+
+class SendMessageEvent extends ChatEvent {
+  final String detail;
+  final String amount;
+  final String receiverId;
+  final String currentUserId;
+
+  const SendMessageEvent({
+    required this.amount,
+    required this.currentUserId,
+    required this.detail,
+    required this.receiverId,
+  });
+
+  @override
+  List<Object> get props => [amount, currentUserId, receiverId,detail];
+}

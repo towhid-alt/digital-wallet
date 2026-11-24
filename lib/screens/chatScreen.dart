@@ -1,4 +1,5 @@
 import 'package:digital_wallet/bloc/chat/chat_bloc.dart';
+import 'package:digital_wallet/models/messages.dart';
 import 'package:digital_wallet/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,10 +27,15 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    fetchChatHistory();
+    connectSocket();
+    //fetchChatHistory();
   }
 
-  Future<void> fetchChatHistory() async {
+  void connectSocket(){
+    context.read<ChatBloc>().add(ConnectSocketEvent(userId: widget.currentUserId));
+  }
+
+  /**Future<void> fetchChatHistory() async {
     try {
       context.read<ChatBloc>().add(
         FetchChat(
@@ -40,9 +46,14 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       print('Error fetching chats: $e');
     }
-  }
+  }*/
 
-  void _sendMessage() {}
+  void _sendMessage() {
+    final detail = _detailsController.text.trim();
+    final amount = _amountController.text;
+
+    context.read<ChatBloc>().add(SendMessageEvent(amount: amount, currentUserId: widget.currentUserId, detail: detail, receiverId: widget.receiverId));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +76,7 @@ class _ChatScreenState extends State<ChatScreen> {
               return Center(child: Text('Chat error'));
             }
 
-            if (state is ChatLoaded) {
+            if (state is ChatConnected) {
               return Column(
                 children: [
                   Expanded(
@@ -87,16 +98,8 @@ class _ChatScreenState extends State<ChatScreen> {
                             itemCount: state.chats.length,
                             itemBuilder: (context, index) {
                               final chat = state.chats[index];
-                              return Card(
-                                child: ListTile(
-                                  title: Text(
-                                    'Amount: ${chat['amount'] ?? 'Unknown'}',
-                                  ),
-                                  subtitle: Text(
-                                    'Status: ${chat['status'] ?? 'Unknown'}',
-                                  ),
-                                ),
-                              );
+                              final isOwnMessage = chat.senderId == widget.currentUserId;
+                              return _buildOweCard(message: chat, isOwnMessage: isOwnMessage);
                             },
                           ),
                   ),
@@ -138,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                                 controller: _detailsController,
                                 decoration: const InputDecoration(
-                                  hintText: 'Enter Owe detail',
+                                  hintText: 'Enter Owe detail(optional)',
 
                                   hintStyle: TextStyle(
                                     color: AppColors.text
@@ -170,5 +173,62 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
     );
+  }
+
+/**
+ * Owe card UI
+ */
+  Widget _buildOweCard({
+    required Message message,
+    required bool isOwnMessage,
+  }){
+    return Align(
+      alignment: isOwnMessage? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        width: 300,
+        height: 150,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          shape: BoxShape.rectangle,
+          image: DecorationImage(image: AssetImage('assets/images/owes-card.png'),
+          fit: BoxFit.cover),
+        ),
+        child: Center(
+          child: Column(
+            children: [
+              Text(message.amount, style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 40,
+              ),),
+              const SizedBox(height: 6,),
+              Text(message.detail, style: TextStyle(
+                color: Colors.white,
+              ),),
+              const SizedBox(height: 4,),
+              Text(
+                _formatTime(message.createdAt),
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(DateTime time) {
+    final now = DateTime.now();
+    if (now.day == time.day &&
+        now.month == time.month &&
+        now.year == time.year) {
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    } else {
+      return '${time.day}/${time.month}/${time.year} ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
   }
 }
