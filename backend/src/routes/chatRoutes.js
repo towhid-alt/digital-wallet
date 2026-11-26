@@ -6,6 +6,6 @@ const { fetchChats, sendChat } = require("../controllers/chatsController")
 const router = express.Router()
 
 router.get('/fetchChats', authMiddleware, fetchChats)
-router.post('/send', authMiddleware, sendChat)
+//router.post('/send', authMiddleware, sendChat)
 
 module.exports = router

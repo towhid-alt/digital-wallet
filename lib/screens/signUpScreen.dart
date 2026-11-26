@@ -50,7 +50,6 @@ class _SignupscreenState extends State<Signupscreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        // TODO: implement listener
         if (state is AuthAuthenticated) {
           // Navigate to home screen
           Navigator.pushNamed(

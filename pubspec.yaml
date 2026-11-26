@@ -70,6 +70,8 @@ flutter:
     - assets/icons/transfer.png
     - assets/icons/friends.png
     - assets/images/owes-card.png
+    - assets/images/owes-card-black.png
+    - assets/images/owes-card-red.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

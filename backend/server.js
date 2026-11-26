@@ -60,12 +60,13 @@ io.on('connection', (socket) => {
                 detail: message.detail
             })
 
-            //Emitting message to both sender and receiver
-            const senderId = onlineUsers[data.senderId]
+            //Emitting message to receiver only
+            //const senderId = onlineUsers[data.senderId]
             const receiverId = onlineUsers[data.receiverId]
-            if (senderId) {
+            /*if (senderId) {
+                console.log('Emitting to senderId')
                 io.to(senderId.toString()).emit('receiveMessage', addMessage)
-            }
+            }*/
             if (receiverId) {
                 io.to(receiverId.toString()).emit('receiveMessage', addMessage)
 

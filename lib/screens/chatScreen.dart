@@ -21,23 +21,40 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  late final ChatBloc _chatBloc;
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _detailsController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _chatBloc = context.read<ChatBloc>();
     connectSocket();
-    //fetchChatHistory();
+    fetchChatHistory();
+    _scrollToBottom();//FIXME: scroll to bottom not working initially after navigating to this screen
   }
 
-  void connectSocket(){
-    context.read<ChatBloc>().add(ConnectSocketEvent(userId: widget.currentUserId));
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _detailsController.dispose();
+    _scrollController.dispose();
+    clearList();
+    super.dispose();
   }
 
-  /**Future<void> fetchChatHistory() async {
+  void clearList() {
+    _chatBloc.add(ClearLocalListEvent());
+  }
+
+  void connectSocket() {
+    _chatBloc.add(ConnectSocketEvent(userId: widget.currentUserId));
+  }
+
+  Future<void> fetchChatHistory() async {
     try {
-      context.read<ChatBloc>().add(
+      _chatBloc.add(
         FetchChat(
           currentUserId: widget.currentUserId,
           receiverId: widget.receiverId,
@@ -46,13 +63,35 @@ class _ChatScreenState extends State<ChatScreen> {
     } catch (e) {
       print('Error fetching chats: $e');
     }
-  }*/
+  }
 
   void _sendMessage() {
     final detail = _detailsController.text.trim();
     final amount = _amountController.text;
 
-    context.read<ChatBloc>().add(SendMessageEvent(amount: amount, currentUserId: widget.currentUserId, detail: detail, receiverId: widget.receiverId));
+    _chatBloc.add(
+      SendMessageEvent(
+        amount: amount,
+        currentUserId: widget.currentUserId,
+        detail: detail,
+        receiverId: widget.receiverId,
+      ),
+    );
+    _amountController.clear();
+    _detailsController.clear();
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -62,9 +101,10 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.foreground,
         foregroundColor: AppColors.text,
-        title: Text(widget.receiverName, style: TextStyle(
-          color: AppColors.text
-        ),),
+        title: Text(
+          widget.receiverName,
+          style: TextStyle(color: AppColors.text),
+        ),
       ),
       body: Container(
         child: BlocBuilder<ChatBloc, ChatState>(
@@ -91,6 +131,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           )
                         : ListView.builder(
+                            controller: _scrollController,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
@@ -98,8 +139,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             itemCount: state.chats.length,
                             itemBuilder: (context, index) {
                               final chat = state.chats[index];
-                              final isOwnMessage = chat.senderId == widget.currentUserId;
-                              return _buildOweCard(message: chat, isOwnMessage: isOwnMessage);
+                              final isOwnMessage =
+                                  chat.senderId == widget.currentUserId;
+                              return _buildOweCard(
+                                message: chat,
+                                isOwnMessage: isOwnMessage,
+                              );
                             },
                           ),
                   ),
@@ -108,9 +153,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    decoration: BoxDecoration(
-                      color: AppColors.foreground
-                    ),
+                    decoration: BoxDecoration(color: AppColors.foreground),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
@@ -121,31 +164,23 @@ class _ChatScreenState extends State<ChatScreen> {
                               TextField(
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly
+                                  FilteringTextInputFormatter.digitsOnly,
                                 ],
-                                style: TextStyle(
-                                  color: AppColors.text
-                                ),
+                                style: TextStyle(color: AppColors.text),
                                 controller: _amountController,
                                 decoration: const InputDecoration(
                                   hintText: 'Enter Owe amount',
-                                  hintStyle: TextStyle(
-                                    color: AppColors.text
-                                  )
+                                  hintStyle: TextStyle(color: AppColors.text),
                                 ),
                               ),
                               const SizedBox(height: 10),
                               TextField(
-                                style: TextStyle(
-                                  color: AppColors.text
-                                ),
+                                style: TextStyle(color: AppColors.text),
                                 controller: _detailsController,
                                 decoration: const InputDecoration(
                                   hintText: 'Enter Owe detail(optional)',
 
-                                  hintStyle: TextStyle(
-                                    color: AppColors.text
-                                  )
+                                  hintStyle: TextStyle(color: AppColors.text),
                                 ),
                               ),
                             ],
@@ -175,47 +210,65 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-/**
+  /**
  * Owe card UI
  */
-  Widget _buildOweCard({
-    required Message message,
-    required bool isOwnMessage,
-  }){
+  Widget _buildOweCard({required Message message, required bool isOwnMessage}) {
     return Align(
-      alignment: isOwnMessage? Alignment.centerRight : Alignment.centerLeft,
+      alignment: isOwnMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         width: 300,
         height: 150,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          shape: BoxShape.rectangle,
-          image: DecorationImage(image: AssetImage('assets/images/owes-card.png'),
-          fit: BoxFit.cover),
-        ),
-        child: Center(
-          child: Column(
-            children: [
-              Text(message.amount, style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 40,
-              ),),
-              const SizedBox(height: 6,),
-              Text(message.detail, style: TextStyle(
-                color: Colors.white,
-              ),),
-              const SizedBox(height: 4,),
-              Text(
-                _formatTime(message.createdAt),
-                textAlign: TextAlign.end,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+          borderRadius: BorderRadius.circular(15).copyWith(
+            bottomRight: isOwnMessage ? const Radius.circular(4) : null,
+            bottomLeft: isOwnMessage ? null : const Radius.circular(4),
           ),
+          shape: BoxShape.rectangle,
+          image: isOwnMessage
+              ? DecorationImage(
+                  image: AssetImage('assets/images/owes-card.png'),
+                  fit: BoxFit.cover,
+                )
+              : DecorationImage(
+                  image: AssetImage('assets/images/owes-card-red.png'),
+                  fit: BoxFit.cover,
+                ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '₹',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: message.amount,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 42,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(message.detail, style: TextStyle(color: Colors.white)),
+            const SizedBox(height: 4),
+            Text(
+              _formatTime(message.createdAt),
+              textAlign: TextAlign.right,
+              style: TextStyle(color: Colors.white, fontSize: 11),
+            ),
+          ],
         ),
       ),
     );

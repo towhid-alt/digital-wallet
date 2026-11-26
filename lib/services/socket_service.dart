@@ -40,7 +40,6 @@ class SocketService {
    * Send a message
    */
   void sendMessage(Message message){
-          print('Inside sendMessage emitter...');
     if(isConnected){
       socket.emit('sendMessage', {
         'senderId': message.senderId,

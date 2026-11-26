@@ -23,11 +23,6 @@ async function fetchChats(req, res) {
     }
 }
 
-/**
- * Send chat
- */
-async function sendChat(req, res) {
 
-}
 
-module.exports = { fetchChats, sendChat }
+module.exports = { fetchChats }

@@ -53,3 +53,5 @@ class SendMessageEvent extends ChatEvent {
   @override
   List<Object> get props => [amount, currentUserId, receiverId,detail];
 }
+
+class ClearLocalListEvent extends ChatEvent {}

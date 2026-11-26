@@ -37,8 +37,8 @@ const Message({
     id: json['id'].toString(),
     detail: json['detail'] ?? '',
     amount: json['amount'].toString(),
-    senderId: json['sender_id'].toString(),
-    receiverId: json['receiver_id'].toString(),
+    senderId: json['senderId'].toString(),
+    receiverId: json['receiverId'].toString(),
     status: json['status'],
     createdAt: DateTime.parse(json['createdAt']),
   );
