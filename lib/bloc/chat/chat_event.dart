@@ -55,3 +55,21 @@ class SendMessageEvent extends ChatEvent {
 }
 
 class ClearLocalListEvent extends ChatEvent {}
+
+class OweAcceptedEvent extends ChatEvent {
+  final String oweId;
+
+  const OweAcceptedEvent({required this.oweId});
+
+  @override
+  List<Object> get props => [oweId];
+}
+
+class OweRejectedEvent extends ChatEvent {
+  final String oweId;
+
+  const OweRejectedEvent({required this.oweId});
+
+  @override
+  List<Object> get props => [oweId];
+}

@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatBloc = context.read<ChatBloc>();
     connectSocket();
     fetchChatHistory();
-    _scrollToBottom();//FIXME: scroll to bottom not working initially after navigating to this screen
+    _scrollToBottom();
   }
 
   @override
@@ -94,6 +94,13 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  void _oweAccepted(String oweId){
+    context.read<ChatBloc>().add(OweAcceptedEvent(oweId: oweId));
+  }
+  void _oweRejected(String oweId){
+    context.read<ChatBloc>().add(OweRejectedEvent(oweId: oweId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,6 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               return _buildOweCard(
                                 message: chat,
                                 isOwnMessage: isOwnMessage,
+                                oweId: chat.id,
+                                oweStatus: chat.status,
                               );
                             },
                           ),
@@ -213,63 +222,133 @@ class _ChatScreenState extends State<ChatScreen> {
   /**
  * Owe card UI
  */
-  Widget _buildOweCard({required Message message, required bool isOwnMessage}) {
+  Widget _buildOweCard({required Message message, required bool isOwnMessage, required String oweId,required String oweStatus}) {
     return Align(
       alignment: isOwnMessage ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        width: 300,
-        height: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15).copyWith(
-            bottomRight: isOwnMessage ? const Radius.circular(4) : null,
-            bottomLeft: isOwnMessage ? null : const Radius.circular(4),
-          ),
-          shape: BoxShape.rectangle,
-          image: isOwnMessage
-              ? DecorationImage(
-                  image: AssetImage('assets/images/owes-card.png'),
-                  fit: BoxFit.cover,
-                )
-              : DecorationImage(
-                  image: AssetImage('assets/images/owes-card-red.png'),
-                  fit: BoxFit.cover,
-                ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: '₹',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextSpan(
-                    text: message.amount,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 42,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+      child: Column(
+        crossAxisAlignment: isOwnMessage
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 300,
+            height: 150,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15).copyWith(
+                bottomRight: isOwnMessage ? const Radius.circular(4) : null,
+                bottomLeft: isOwnMessage ? null : const Radius.circular(4),
               ),
+              shape: BoxShape.rectangle,
+              image: isOwnMessage
+                  ? DecorationImage(
+                      image: AssetImage('assets/images/owes-card.png'),
+                      fit: BoxFit.cover,
+                    )
+                  : DecorationImage(
+                      image: AssetImage('assets/images/owes-card-yellow.png'),
+                      fit: BoxFit.cover,
+                    ),
             ),
-            const SizedBox(height: 6),
-            Text(message.detail, style: TextStyle(color: Colors.white)),
-            const SizedBox(height: 4),
-            Text(
-              _formatTime(message.createdAt),
-              textAlign: TextAlign.right,
-              style: TextStyle(color: Colors.white, fontSize: 11),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '₹',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      TextSpan(
+                        text: message.amount,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 42,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(message.detail, style: TextStyle(color: Colors.white)),
+                const SizedBox(height: 4),
+                Container(
+                  width: 75,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: oweStatus == 'ACCEPTED'? Colors.green : oweStatus == 'PENDING'? Colors.grey:Colors.red
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(oweStatus == 'ACCEPTED'? Icons.done : oweStatus == 'PENDING'? Icons.access_time_filled_sharp: Icons.cancel),
+                      const SizedBox(width: 4,),
+                      Text(oweStatus, style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                      ),)
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4,),
+                Text(
+                  _formatTime(message.createdAt),
+                  textAlign: TextAlign.right,
+                  style: TextStyle(color: Colors.white, fontSize: 11),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 5),
+          /**
+           * Owe Card Buttons
+           */
+          if (!isOwnMessage && oweStatus == 'PENDING')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 20),
+                //Accept Button
+                ElevatedButton(
+                  onPressed: () {
+                    _oweAccepted(oweId);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.done, color: Colors.green,),
+                      const SizedBox(width: 5),
+                      const Text('Accept', style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold
+                      ),),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                //Delete Owe button
+                ElevatedButton(
+                  onPressed: () {
+                    _oweRejected(oweId);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.cancel, color: Colors.red,),
+                      const SizedBox(width: 5),
+                      const Text('Reject', style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold
+                      ),),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

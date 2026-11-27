@@ -1,5 +1,4 @@
 const express = require('express')
-const { db } = require('../prisma/db.ts')
 const { authMiddleware } = require('../middleware/middlewareAuth.js')
 const { sendRequestController, fetchRequests, requestAccepted, requestRejected, fetchFriends } = require('../controllers/friendsController.js')
 

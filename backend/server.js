@@ -29,11 +29,13 @@ const authRouter = require('./src/routes/authroutes.js')
 const accountsRouter = require('./src/routes/accountRoutes.js')
 const requestsRouter = require('./src/routes/friendRequests.js')
 const chatRouter = require('./src/routes/chatRoutes.js')
+const owesRouter = require('./src/routes/oweRoutes.js')
 
 app.use('/api/auth',authRouter)
 app.use('/api/accounts',accountsRouter)
 app.use('/api/requests', requestsRouter)
 app.use('/api/chats', chatRouter)
+app.use('/api/owes', owesRouter)
 
 io.on('connection', (socket) => {
     console.log('New client connected')

@@ -26,6 +26,32 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<SendMessageEvent>(_onSendMessage);
     on<ReceiveMessageEvent>(_onReceiveMessage);
     on<ClearLocalListEvent>(_onClearList);
+    on<OweAcceptedEvent>(_onOweAccept);
+    on<OweRejectedEvent>(_onOweReject);
+  }
+
+  void _onOweAccept(
+    OweAcceptedEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    final response = await _chatService._oweAccept(oweId: event.oweId);
+    if(response['success']){
+      emit(ChatConnected(chats: chats, isConnected: true));
+    } else {
+      emit(ChatError(error: response['message']));
+    }
+  }
+
+  void _onOweReject(
+    OweRejectedEvent event,
+    Emitter<ChatState> emit,
+  ) async {
+    final response = await _chatService._oweReject(oweId: event.oweId);
+    if(response['success']){
+      emit(ChatConnected(chats: chats, isConnected: true));
+    } else {
+      emit(ChatError(error: response['message']));
+    }
   }
 
   /**
@@ -172,6 +198,51 @@ class ChatService {
         return {'success': false, 'message':'Error fetching chat'};
       }
     } catch (e) {
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+
+  /**
+   * Owe Accepted
+   */
+  Future<Map<String, dynamic>> _oweAccept({
+    required String oweId
+  })async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseurl/api/owes/accept'),
+        headers: {'Content-Type': 'application/json'},
+        body: {'oweId': oweId}
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200){
+        return {'success': true, 'message': data['message']};
+      } else {
+        return {'success': false, 'message': data['message']};
+      }
+    } catch(e){
+      return {'success': false, 'message': 'Error: $e'};
+    }
+  }
+   /**
+   * Owe Rejected
+   */
+  Future<Map<String, dynamic>> _oweReject({
+    required String oweId
+  })async {
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseurl/api/owes/delete'),
+        headers: {'Content-Type': 'application/json'},
+        body: {'oweId': oweId}
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200){
+        return {'success': true, 'message': data['message']};
+      } else {
+        return {'success': false, 'message': data['message']};
+      }
+    } catch(e){
       return {'success': false, 'message': 'Error: $e'};
     }
   }
