@@ -67,4 +67,4 @@ async function fetchChats(req, res) {
 
 
 
-module.exports = { fetchChats }
+module.exports = { fetchChats, fetchCacheKey }

@@ -30,12 +30,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<OweRejectedEvent>(_onOweReject);
   }
 
+  List<Message> updateChats ({required String oweId, required String updatedStatus}) {
+    return chats
+        .map((chat) => chat.id == oweId
+            ? chat.copyWith(status: updatedStatus)
+            : chat)
+        .toList();
+  }
+
   void _onOweAccept(
     OweAcceptedEvent event,
     Emitter<ChatState> emit,
   ) async {
-    final response = await _chatService._oweAccept(oweId: event.oweId);
+    final response = await _chatService._oweAccept(oweId: event.oweId, senderId: event.senderId, receiverId: event.receiverId);
     if(response['success']){
+      chats = updateChats(oweId: event.oweId, updatedStatus: 'ACCEPTED');
       emit(ChatConnected(chats: chats, isConnected: true));
     } else {
       emit(ChatError(error: response['message']));
@@ -46,8 +55,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     OweRejectedEvent event,
     Emitter<ChatState> emit,
   ) async {
-    final response = await _chatService._oweReject(oweId: event.oweId);
+    final response = await _chatService._oweReject(oweId: event.oweId, senderId: event.senderId, receiverId: event.receiverId);
     if(response['success']){
+      chats = updateChats(oweId: event.oweId, updatedStatus: 'REJECTED');
       emit(ChatConnected(chats: chats, isConnected: true));
     } else {
       emit(ChatError(error: response['message']));
@@ -206,13 +216,19 @@ class ChatService {
    * Owe Accepted
    */
   Future<Map<String, dynamic>> _oweAccept({
-    required String oweId
+    required String oweId,
+    required String senderId,
+    required String receiverId
   })async {
     try {
-      final response = await http.delete(
+      final response = await http.post(
         Uri.parse('$baseurl/api/owes/accept'),
         headers: {'Content-Type': 'application/json'},
-        body: {'oweId': oweId}
+        body: jsonEncode({
+          'oweId': oweId,
+          'senderId': senderId,
+          'receiverId': receiverId,
+        }),
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200){
@@ -228,13 +244,17 @@ class ChatService {
    * Owe Rejected
    */
   Future<Map<String, dynamic>> _oweReject({
-    required String oweId
+    required String oweId,
+    required String senderId,
+    required String receiverId
   })async {
     try {
-      final response = await http.delete(
+      final response = await http.post(
         Uri.parse('$baseurl/api/owes/delete'),
         headers: {'Content-Type': 'application/json'},
-        body: {'oweId': oweId}
+        body:jsonEncode({'oweId': oweId,
+        'senderId': senderId,
+        'receiverId': receiverId}) 
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200){

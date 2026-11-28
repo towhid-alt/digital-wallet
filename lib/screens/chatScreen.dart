@@ -32,7 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatBloc = context.read<ChatBloc>();
     connectSocket();
     fetchChatHistory();
-    _scrollToBottom();
   }
 
   @override
@@ -79,7 +78,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
     _amountController.clear();
     _detailsController.clear();
-    _scrollToBottom();
   }
 
   void _scrollToBottom() {
@@ -95,10 +93,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _oweAccepted(String oweId){
-    context.read<ChatBloc>().add(OweAcceptedEvent(oweId: oweId));
+    context.read<ChatBloc>().add(OweAcceptedEvent(oweId: oweId, receiverId: widget.receiverId, senderId: widget.currentUserId));
   }
   void _oweRejected(String oweId){
-    context.read<ChatBloc>().add(OweRejectedEvent(oweId: oweId));
+    context.read<ChatBloc>().add(OweRejectedEvent(oweId: oweId, receiverId: widget.receiverId, senderId: widget.currentUserId));
   }
 
   @override
@@ -114,7 +112,13 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       ),
       body: Container(
-        child: BlocBuilder<ChatBloc, ChatState>(
+        child: BlocConsumer<ChatBloc, ChatState>(
+          listenWhen: (previous, current) =>
+              current is ChatConnected &&
+              current.chats.isNotEmpty &&
+              (previous is! ChatConnected ||
+                  current.chats.length > previous.chats.length),
+          listener: (context, state) => _scrollToBottom(),
           builder: (context, state) {
             if (state is ChatLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -279,13 +283,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 Text(message.detail, style: TextStyle(color: Colors.white)),
                 const SizedBox(height: 4),
                 Container(
-                  width: 75,
                   height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    color: oweStatus == 'ACCEPTED'? Colors.green : oweStatus == 'PENDING'? Colors.grey:Colors.red
+                    color: oweStatus == 'ACCEPTED'? Colors.green : oweStatus == 'PENDING'? const Color.fromARGB(255, 153, 98, 98):Colors.red,
+                    borderRadius: BorderRadius.circular(15)
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(width: 3,),
                       Icon(oweStatus == 'ACCEPTED'? Icons.done : oweStatus == 'PENDING'? Icons.access_time_filled_sharp: Icons.cancel),
                       const SizedBox(width: 4,),
                       Text(oweStatus, style: TextStyle(

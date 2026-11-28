@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const http = require("http")
 const { Server } = require("socket.io")
 const { db } = require("./src/prisma/db.ts")
+const redis = require('./src/client.js')
+const { fetchCacheKey } = require('./src/controllers/chatsController.js')
 
 dotenv.config();
 const app = express();
@@ -61,6 +63,10 @@ io.on('connection', (socket) => {
                 amount: amount,
                 detail: message.detail
             })
+
+            //Updating cache to avoid stale cache data for chats.
+            const cacheKey = fetchCacheKey(message.senderId,message.receiverId)
+            await redis.set(cacheKey, addMessage)
 
             //Emitting message to receiver only
             //const senderId = onlineUsers[data.senderId]

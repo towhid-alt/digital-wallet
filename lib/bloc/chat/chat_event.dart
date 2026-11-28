@@ -58,18 +58,22 @@ class ClearLocalListEvent extends ChatEvent {}
 
 class OweAcceptedEvent extends ChatEvent {
   final String oweId;
+  final String senderId;
+  final String receiverId;
 
-  const OweAcceptedEvent({required this.oweId});
+  const OweAcceptedEvent({required this.oweId, required this.receiverId, required this.senderId});
 
   @override
-  List<Object> get props => [oweId];
+  List<Object> get props => [oweId, senderId, receiverId];
 }
 
 class OweRejectedEvent extends ChatEvent {
   final String oweId;
+  final String senderId;
+  final String receiverId;
 
-  const OweRejectedEvent({required this.oweId});
+  const OweRejectedEvent({required this.oweId, required this.receiverId, required this.senderId});
 
   @override
-  List<Object> get props => [oweId];
+  List<Object> get props => [oweId, senderId, receiverId];
 }

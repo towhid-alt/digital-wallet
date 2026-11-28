@@ -20,6 +20,18 @@ const Message({
     required this.createdAt,
 });
 
+Message copyWith({String? status}) {
+  return Message(
+    id: id,
+    detail: detail,
+    amount: amount,
+    senderId: senderId,
+    receiverId: receiverId,
+    status: status ?? this.status,
+    createdAt: createdAt,
+  );
+}
+
 // Convert to JSON for sending over socket - FOR DATA OUT
   Map<String, dynamic> toJson() => {
     'id': id,

@@ -5,7 +5,7 @@ const { db } = require('../prisma/db.ts');
 const { and, not, or } = require("@prisma/orm-postgres/orm-client")
 const http = require('http');
 
-
+//TODO: Invalidate chats cache during logout
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
